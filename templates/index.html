@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wumpus World — KB Agent</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <h1>WUMPUS WORLD</h1>
+        <p class="subtitle">Knowledge-Based Agent · Resolution Inference</p>
+      </div>
+      <div class="status-bar">
+        <span id="header-status" class="status-text">AWAITING INIT</span>
+        <span class="status-dot" id="status-dot"></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-layout">
+
+    <!-- LEFT PANEL: Controls -->
+    <div class="left-panel">
+
+      <div class="panel-section">
+        <div class="panel-title">CONFIGURATION</div>
+        <div class="config-grid">
+          <label class="field">
+            <span class="field-label">ROWS</span>
+            <input type="number" id="input-rows" value="4" min="2" max="6" class="field-input" />
+          </label>
+          <label class="field">
+            <span class="field-label">COLS</span>
+            <input type="number" id="input-cols" value="4" min="2" max="6" class="field-input" />
+          </label>
+          <label class="field full-width">
+            <span class="field-label">PITS</span>
+            <input type="number" id="input-pits" value="3" min="1" max="6" class="field-input" />
+          </label>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-title">CONTROLS</div>
+        <div class="btn-group">
+          <button id="btn-new" class="btn btn-primary" onclick="newEpisode()">NEW EPISODE</button>
+          <button id="btn-step" class="btn btn-secondary" onclick="stepAgent()" disabled>STEP</button>
+          <button id="btn-auto" class="btn btn-accent" onclick="toggleAuto()" disabled>AUTO</button>
+          <button id="btn-stop" class="btn btn-danger" onclick="stopAuto()" disabled>STOP</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CENTER PANEL: Grid + Sidebar -->
+    <div class="center-panel">
+      <div id="world-container" class="world-container">
+        <div class="grid-with-sidebar">
+          <div class="grid-section">
+            <div id="grid-wrapper" class="grid-wrapper">
+              <div id="grid" class="grid"></div>
+            </div>
+          </div>
+          
+          <div id="info-sidebar" class="info-sidebar">
+            <div class="percepts-sidebar">
+              <div class="sidebar-title">CELL PERCEPTS</div>
+              <div id="percepts-sidebar-content" class="percepts-sidebar-grid">
+                <div class="no-percept">No cells visited</div>
+              </div>
+            </div>
+            
+            <div class="metrics-sidebar">
+              <div class="sidebar-title">METRICS</div>
+              <div class="metrics-list">
+                <div class="metric-row">
+                  <span class="metric-label">Inference Steps</span>
+                  <span class="metric-value" id="m-inference">0</span>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-label">Visited Cells</span>
+                  <span class="metric-value" id="m-visited">0</span>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-label">KB Clauses</span>
+                  <span class="metric-value" id="m-clauses">0</span>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-label">Resolution Calls</span>
+                  <span class="metric-value" id="m-res-calls">0</span>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-label">Resolution Steps</span>
+                  <span class="metric-value" id="m-res-steps">0</span>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-label">Steps Taken</span>
+                  <span class="metric-value" id="m-steps">0</span>
+                </div>
+                <div class="metric-row highlight-row">
+                  <span class="metric-label">SCORE</span>
+                  <span class="metric-value accent" id="m-score">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div id="empty-state" class="empty-state">
+          <p>Configure grid and press <strong>NEW EPISODE</strong></p>
+        </div>
+      </div>
+
+      <div class="percepts-box" id="percepts-display">
+        <span class="no-percept">current percepts: none</span>
+      </div>
+
+      <div id="message-bar" class="message-bar">
+        <span id="message-text">Configure and press NEW EPISODE</span>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>
