@@ -1,73 +1,67 @@
-# WUMPUS WORLD - Knowledge-Based Agent
+# ⚔️ The Corrupted Depths
 
-An intelligent agent that navigates the Wumpus World environment using propositional logic and resolution-based inference to make safe decisions.
+A knowledge-based AI agent navigates a corrupted fantasy dungeon using propositional logic and resolution inference.
 
-## 📋 Overview
+## 🎮 About
 
-The Wumpus World is a classic AI problem where an agent must navigate a cave filled with pits and a deadly Wumpus creature. This implementation features a knowledge-based agent that uses logical inference to deduce safe paths and avoid hazards. The agent never relies on luck - every move is justified by logical deduction from its percepts.
+The Corrupted Depths is a game where an AI agent uses logical reasoning to explore a dangerous dungeon. The agent detects percepts like Corruption Aura and Putrid Decay to avoid deadly rifts and defeat the Corrupted Beast.
 
-## ✨ Features
+**Themes:**
+- **Fantasy**: Knight hero, dungeon setting, mythical beast
+- **Corrupted**: Dark visuals, Corruption Rifts, Corrupted Beast
 
-- **Knowledge-Based Agent**: Uses propositional logic to maintain and reason about world knowledge
-- **Resolution Inference**: Implements resolution refutation for logical entailment
-- **Real-time Visualization**: Interactive grid display showing agent position, visited cells, and percepts
-- **Multiple Control Modes**: Manual step-by-step or autonomous exploration
-- **Performance Metrics**: Tracks inference steps, resolution calls, visited cells, and score
-- **Percept Tracking**: Displays breeze and stench detection at each visited cell
-- **Configurable World**: Adjustable grid size and number of pits
+## 🧠 How It Works
 
-## 🎮 How It Works
+The AI agent uses a **Knowledge Base** with:
+- **TELL**: Adds percepts to the Knowledge Base
+- **ASK**: Queries the KB to determine if a cell is safe
+- **Resolution**: Uses resolution principle to prove or disprove facts
+- **Decision**: Chooses the nearest safe unexplored cell
 
-### Agent Logic
+## 🚀 Tech Stack
 
-1. **Perception**: Agent detects BREEZE (adjacent pit) and STENCH (adjacent Wumpus) at current cell
-2. **Knowledge Update**: Percepts are added to Knowledge Base as logical clauses
-3. **Inference**: Resolution algorithm queries safe neighboring cells
-4. **Decision**: Agent moves to a proven safe cell or explores frontier if no safe cell is proven
+- **Backend**: Python, Flask
+- **Frontend**: HTML5, CSS3, JavaScript
+- **Audio**: Web Audio API
+- **Fonts**: Cinzel, IBM Plex Mono
 
-### Logical Rules
-B(i,j) → ∃ adjacent P(i,j) (Breeze implies adjacent pit)
-S(i,j) → ∃ adjacent W(i,j) (Stench implies adjacent Wumpus)
-¬B(i,j) → ∀ adjacent ¬P(i,j) (No breeze means no adjacent pits)
-¬S(i,j) → ∀ adjacent ¬W(i,j) (No stench means no adjacent Wumpus)
-Safe(i,j) → ¬P(i,j) ∧ ¬W(i,j) (Safe means no pit and no Wumpus)
+## 📸 Screenshots
 
-text
+<img width="1919" height="874" alt="image" src="https://github.com/user-attachments/assets/90c65090-1186-476c-8cff-a2c95cfb9b2d" />
+<img width="1911" height="869" alt="image" src="https://github.com/user-attachments/assets/382ae982-c82e-4085-854f-e81a16bd0ea9" />
+<img width="309" height="322" alt="image" src="https://github.com/user-attachments/assets/f3c3272c-5e0a-4818-af21-5f7963786964" />
 
-## 🚀 Installation
 
-### Prerequisites
+## 🎯 Features
 
-- Python 3.8 or higher
-- Flask
+- AI-powered decision making using propositional logic
+- Interactive step-by-step gameplay
+- Automated exploration mode
+- Real-time metrics (inference steps, resolution calls, score)
+- Procedural sound effects
+- Keyboard shortcuts (N=New, S=Step, Space=Auto)
 
-### Setup Instructions
+## 🎮 How to Play
 
-1. **Clone the repository**
+1. Configure the dungeon (rows, columns, corruption rifts)
+2. Click "New Episode"
+3. Click "Step" to move the agent one step at a time
+4. Or click "Auto" to watch the AI explore
+
+## 📦 Installation
+
 ```bash
-git clone https://github.com/yourusername/wumpus-world-kb-agent.git
-cd wumpus-world-kb-agent
-Install Flask
+# Clone the repository
+git clone https://github.com/Asmakhan427/the-corrupted-depths.git
 
-bash
+# Navigate to the project folder
+cd the-corrupted-depths
+
+# Install Flask
 pip install flask
-Run the application
 
-bash
+# Run the game
 python app.py
-Open your browser and navigate to:
 
-text
+# Open your browser
 http://localhost:5000
-📁 Project Structure
-text
-wumpus-world-kb-agent/
-├── app.py                 # Flask backend with KB and agent logic
-├── templates/
-│   └── index.html        # Main UI template
-├── static/
-│   ├── style.css         # Styling (solid colors, no gradients)
-│   └── script.js         # Frontend logic and API calls
-└── README.md             # Project documentation
-
-Fall back to closest frontier if no safe cells proven
