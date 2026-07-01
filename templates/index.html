@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Corrupted Depths</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+    <!-- ─── EMBERS (ambient background) ─────────────────────── -->
+    <div class="embers" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <!-- ─── THEME MODAL ──────────────────────────────────────── -->
+    <div id="theme-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h1>⚔️ The Corrupted Depths</h1>
+            <p class="modal-sub">A Fantasy Dungeon &middot; Purge the Dark Corruption</p>
+
+            <div class="theme-box fantasy">
+                <h3>🏰 Fantasy</h3>
+                <p>You are a knight descending into an ancient dungeon — gold-leaf sigils, mythical beasts, and half-forgotten magic.</p>
+            </div>
+
+            <div class="theme-box corrupted">
+                <h3>☠️ Corrupted</h3>
+                <p>A rot has taken the stone. The Wumpus stirs as a Corrupted Beast, and the old pit traps have become Corruption Rifts.</p>
+            </div>
+
+            <div class="theme-tags">
+                <span class="tag-fantasy">⚔️ Fantasy</span>
+                <span class="tag-corrupted">☠️ Corrupted</span>
+            </div>
+
+            <button onclick="closeModal()" class="enter-btn">⚔️ Enter the Dungeon</button>
+        </div>
+    </div>
+
+    <!-- ─── HEADER ────────────────────────────────────────────── -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="torch torch-left" aria-hidden="true"><span class="flame"></span></div>
+
+            <div class="logo">
+                <h1>⚔️ The Corrupted Depths</h1>
+                <p class="subtitle">A Fantasy Dungeon &middot; Purge the Dark Corruption</p>
+                <div class="theme-badges">
+                    <span class="badge-fantasy">⚔️ Fantasy</span>
+                    <span class="badge-corrupted">☠️ Corrupted</span>
+                </div>
+            </div>
+
+            <div class="status-bar">
+                <span id="header-status" class="status-text">⚔️ Awaiting Init</span>
+                <span class="status-dot" id="status-dot"></span>
+            </div>
+
+            <div class="torch torch-right" aria-hidden="true"><span class="flame"></span></div>
+        </div>
+    </header>
+
+    <!-- ─── MAIN LAYOUT ──────────────────────────────────────── -->
+    <main class="main-layout">
+
+        <!-- ─── LEFT: Controls ───────────────────────────────── -->
+        <aside class="left-panel">
+            <div class="panel-section">
+                <div class="panel-title">⚙️ Configuration</div>
+                <div class="config-grid">
+                    <label class="field">
+                        <span class="field-label">Rows</span>
+                        <input type="number" id="input-rows" value="6" min="2" max="8" />
+                    </label>
+                    <label class="field">
+                        <span class="field-label">Cols</span>
+                        <input type="number" id="input-cols" value="6" min="2" max="8" />
+                    </label>
+                    <label class="field full-width">
+                        <span class="field-label">Corruption Rifts</span>
+                        <input type="number" id="input-pits" value="4" min="1" max="10" />
+                    </label>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-title">🎮 Controls</div>
+                <div class="btn-group">
+                    <button id="btn-new" class="btn btn-primary" onclick="newEpisode()">⚔️ New Episode</button>
+                    <button id="btn-step" class="btn btn-secondary" onclick="stepAgent()" disabled>👣 Step</button>
+                    <button id="btn-auto" class="btn btn-accent" onclick="toggleAuto()" disabled>🤖 Auto</button>
+                    <button id="btn-stop" class="btn btn-danger" onclick="stopAuto()" disabled>⏹ Stop</button>
+                </div>
+                <div class="shortcuts-hint" style="margin-top:8px;font-size:8px;color:var(--purple);text-align:center;letter-spacing:0.3px;border-top:1px solid rgba(155,89,182,0.2);padding-top:6px;">
+                    ⌨️ N=New · S=Step · Space=Auto · Esc=Stop
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-title">🔊 Sound</div>
+                <button id="btn-sound" class="btn btn-primary btn-block" onclick="toggleSound()">🔊 Sound On</button>
+            </div>
+        </aside>
+
+        <!-- ─── CENTER: Grid ─────────────────────────────────── -->
+        <section class="center-panel">
+            <div id="world-container" class="world-container">
+                <div class="grid-wrapper" id="grid-wrapper">
+                    <div id="grid" class="grid"></div>
+                </div>
+
+                <div id="empty-state" class="empty-state">
+                    <div class="empty-icon">🗝️</div>
+                    <p>Configure the dungeon and press <strong>NEW EPISODE</strong></p>
+                    <p class="empty-sub">Purge the corruption, brave hero.</p>
+                </div>
+            </div>
+
+            <div class="percepts-box" id="percepts-display">
+                <span class="no-percept">🔮 Current Percepts: None</span>
+            </div>
+
+            <div id="message-bar" class="message-bar">
+                <span id="message-text">⚔️ Configure and press NEW EPISODE</span>
+            </div>
+        </section>
+
+        <!-- ─── RIGHT: Legend + Metrics ──────────────────────── -->
+        <aside class="right-panel">
+            <div class="panel-section legend-section">
+                <div class="panel-title">📖 Legend</div>
+                <div class="legend-grid">
+                    <div class="legend-item" title="You are the hero!">
+                        <span class="legend-icon agent">⚔️</span>
+                        <span class="legend-label">Hero</span>
+                    </div>
+                    <div class="legend-item" title="Deadly corruption rift - avoid!">
+                        <span class="legend-icon pit">💀</span>
+                        <span class="legend-label">Corruption Rift</span>
+                    </div>
+                    <div class="legend-item" title="The corrupted beast hunts you!">
+                        <span class="legend-icon wumpus">🐉</span>
+                        <span class="legend-label">Corrupted Beast</span>
+                    </div>
+                    <div class="legend-item" title="Safe - proven by logic">
+                        <span class="legend-icon safe">🛡️</span>
+                        <span class="legend-label">Safe Cell</span>
+                    </div>
+                    <div class="legend-item" title="You've been here before">
+                        <span class="legend-icon visited">·</span>
+                        <span class="legend-label">Visited</span>
+                    </div>
+                    <div class="legend-item" title="Not yet explored">
+                        <span class="legend-icon unknown">❓</span>
+                        <span class="legend-label">Unknown</span>
+                    </div>
+                    <div class="legend-item" title="You feel a dark presence nearby">
+                        <span class="legend-icon aura">🌀</span>
+                        <span class="legend-label">Corruption Aura</span>
+                    </div>
+                    <div class="legend-item" title="The beast's stench fills the air">
+                        <span class="legend-icon decay">☠️</span>
+                        <span class="legend-label">Putrid Decay</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section metrics-section">
+                <div class="panel-title">📊 Metrics</div>
+                <div class="metrics-list">
+                    <div class="metric-row"><span class="metric-label">🧠 Inference Steps</span><span class="metric-value" id="m-inference">0</span></div>
+                    <div class="metric-row"><span class="metric-label">👣 Visited Cells</span><span class="metric-value" id="m-visited">0</span></div>
+                    <div class="metric-row"><span class="metric-label">📜 KB Clauses</span><span class="metric-value" id="m-clauses">0</span></div>
+                    <div class="metric-row"><span class="metric-label">⚡ Resolution Calls</span><span class="metric-value" id="m-res-calls">0</span></div>
+                    <div class="metric-row"><span class="metric-label">🔄 Resolution Steps</span><span class="metric-value" id="m-res-steps">0</span></div>
+                    <div class="metric-row"><span class="metric-label">⏱ Steps Taken</span><span class="metric-value" id="m-steps">0</span></div>
+                    <div class="metric-row highlight-row"><span class="metric-label">⭐ Score</span><span class="metric-value accent" id="m-score">0</span></div>
+                </div>
+            </div>
+
+            <div class="panel-section percepts-section">
+                <div class="panel-title">🔮 Cell Percepts</div>
+                <div id="percepts-sidebar-content" class="percepts-sidebar-grid">
+                    <div class="no-percept">No cells visited</div>
+                </div>
+            </div>
+        </aside>
+
+    </main>
+
+    <script>
+        function closeModal() {
+            document.getElementById('theme-modal').style.display = 'none';
+            try { localStorage.setItem('theme_seen_corrupted', 'true'); } catch (e) {}
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            let seen = false;
+            try { seen = !!localStorage.getItem('theme_seen_corrupted'); } catch (e) {}
+            if (!seen) {
+                document.getElementById('theme-modal').style.display = 'flex';
+            }
+        });
+    </script>
+    <script src="/static/script.js"></script>
+</body>
+</html>
