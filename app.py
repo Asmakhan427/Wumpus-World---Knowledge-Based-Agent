@@ -1,6 +1,7 @@
 """
-Wumpus World Knowledge-Based Agent
-Flask Backend - Complete Fixed Version with Score Starting at 0
+THE CORRUPTED DEPTHS
+A Fantasy Dungeon Crawler with Knowledge-Based AI
+Pixel Forge Jam 2026 - Theme: Fantasy + Corrupted
 """
 
 from flask import Flask, render_template, jsonify, request
@@ -8,26 +9,21 @@ import random
 
 app = Flask(__name__)
 
-# ─── Global World State ────────────────────────────────────────────────────────
+# ─── GLOBAL STATE ────────────────────────────────────────────────
 world_state = {}
 
-# ─── Knowledge Base ────────────────────────────────────────────────────────────
+# ─── KNOWLEDGE BASE ──────────────────────────────────────────────
 
 class KnowledgeBase:
-    """
-    Propositional Logic Knowledge Base for the Wumpus World.
-    """
-
     def __init__(self):
-        self.clauses = []          # List of frozensets (CNF clauses)
-        self.facts = set()         # Known positive facts
-        self.negated_facts = set() # Known negative facts
+        self.clauses = []
+        self.facts = set()
+        self.negated_facts = set()
         self.resolution_calls = 0
         self.resolution_steps = 0
         self.inference_steps = 0
 
     def tell(self, clause):
-        """Add a clause to the KB."""
         if isinstance(clause, frozenset):
             if clause not in self.clauses:
                 self.clauses.append(clause)
@@ -43,20 +39,16 @@ class KnowledgeBase:
                     self.facts.add(clause)
 
     def tell_safe(self, x, y):
-        """Assert cell (x,y) has no pit and no wumpus."""
         self.tell(f'~P_{x}_{y}')
         self.tell(f'~W_{x}_{y}')
 
     def tell_pit(self, x, y):
-        """Assert cell (x,y) definitely has a pit."""
         self.tell(f'P_{x}_{y}')
 
     def tell_wumpus(self, x, y):
-        """Assert cell (x,y) definitely has the wumpus."""
         self.tell(f'W_{x}_{y}')
 
     def tell_breeze(self, x, y, rows, cols):
-        """B(x,y) → at least one adjacent pit."""
         neighbors = get_neighbors(x, y, rows, cols)
         if neighbors:
             pit_clause = frozenset([f'P_{nx}_{ny}' for nx, ny in neighbors])
@@ -64,13 +56,11 @@ class KnowledgeBase:
             self.inference_steps += 1
 
     def tell_no_breeze(self, x, y, rows, cols):
-        """¬B(x,y) → no adjacent pits."""
         neighbors = get_neighbors(x, y, rows, cols)
         for nx, ny in neighbors:
             self.tell(f'~P_{nx}_{ny}')
 
     def tell_stench(self, x, y, rows, cols):
-        """S(x,y) → adjacent wumpus."""
         neighbors = get_neighbors(x, y, rows, cols)
         if neighbors:
             wumpus_clause = frozenset([f'W_{nx}_{ny}' for nx, ny in neighbors])
@@ -78,24 +68,20 @@ class KnowledgeBase:
             self.inference_steps += 1
 
     def tell_no_stench(self, x, y, rows, cols):
-        """¬S(x,y) → no adjacent wumpus."""
         neighbors = get_neighbors(x, y, rows, cols)
         for nx, ny in neighbors:
             self.tell(f'~W_{nx}_{ny}')
 
     def ask_safe(self, x, y):
-        """Query: is cell (x,y) safe? (no pit AND no wumpus)"""
         self.resolution_calls += 1
         no_pit = self._resolution_entails(f'~P_{x}_{y}')
         no_wumpus = self._resolution_entails(f'~W_{x}_{y}')
         return no_pit and no_wumpus
 
     def ask_pit(self, x, y):
-        """Check if pit is proven at (x,y)."""
         return self._resolution_entails(f'P_{x}_{y}')
 
     def _resolution_entails(self, query):
-        """Resolution refutation to prove query."""
         if query.startswith('~'):
             base = query[1:]
             if base in self.negated_facts:
@@ -136,7 +122,6 @@ class KnowledgeBase:
         return False
 
     def _resolve(self, c1, c2):
-        """Resolve two clauses."""
         resolvents = []
         for lit in c1:
             complement = lit[1:] if lit.startswith('~') else f'~{lit}'
@@ -148,20 +133,13 @@ class KnowledgeBase:
     def clause_count(self):
         return len(self.clauses)
 
-    def reset_step_counters(self):
-        self.resolution_steps = 0
-
-
-# ─── Helper Functions ──────────────────────────────────────────────────────────
+# ─── HELPERS ──────────────────────────────────────────────────────
 
 def get_neighbors(x, y, rows, cols):
-    """Return valid adjacent cells (up/down/left/right)."""
     candidates = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
     return [(nx, ny) for nx, ny in candidates if 0 <= nx < rows and 0 <= ny < cols]
 
-
 def init_world(rows, cols, num_pits):
-    """Initialize a new Wumpus World with safe starting position."""
     total_cells = rows * cols
     max_pits = min(num_pits, total_cells // 3)
     if max_pits < 1:
@@ -195,16 +173,14 @@ def init_world(rows, cols, num_pits):
         'game_over': False,
         'won': False,
         'dead': False,
-        'message': f'World created: {rows}x{cols} with {len(pit_cells)} pits',
+        'message': '⚔️ Enter the Corrupted Depths...',
         'score': 0,
         'steps_taken': 0,
         'last_percepts': [],
         'cell_status': {}
     }
 
-
 def get_percepts(state, x, y):
-    """Get percepts at cell (x, y)."""
     percepts = []
     rows, cols = state['rows'], state['cols']
     pits = [tuple(p) for p in state['pits']]
@@ -213,33 +189,29 @@ def get_percepts(state, x, y):
     neighbors = get_neighbors(x, y, rows, cols)
     
     if any(n in pits for n in neighbors):
-        percepts.append('BREEZE')
+        percepts.append('CORRUPTION_AURA')
     if any(n == wumpus for n in neighbors):
-        percepts.append('STENCH')
+        percepts.append('PUTRID_DECAY')
     
     return percepts
 
-
 def update_kb(state, x, y, percepts):
-    """TELL the KB what the agent perceives."""
     kb = state['kb']
     rows, cols = state['rows'], state['cols']
     
     kb.tell_safe(x, y)
     
-    if 'BREEZE' in percepts:
+    if 'CORRUPTION_AURA' in percepts:
         kb.tell_breeze(x, y, rows, cols)
     else:
         kb.tell_no_breeze(x, y, rows, cols)
     
-    if 'STENCH' in percepts:
+    if 'PUTRID_DECAY' in percepts:
         kb.tell_stench(x, y, rows, cols)
     else:
         kb.tell_no_stench(x, y, rows, cols)
 
-
 def choose_next_move(state):
-    """Agent decision logic using KB."""
     kb = state['kb']
     rows, cols = state['rows'], state['cols']
     visited = set(map(tuple, state['visited']))
@@ -274,9 +246,7 @@ def choose_next_move(state):
     
     return None, 'no_frontier'
 
-
 def step_agent(state):
-    """Perform one agent step with POSITIVE SCORING from 0."""
     if state['game_over']:
         return state
 
@@ -287,19 +257,24 @@ def step_agent(state):
     pits = [tuple(p) for p in state['pits']]
     wumpus = tuple(state['wumpus'])
     
-    if (ax, ay) in pits or (ax, ay) == wumpus:
+    if (ax, ay) in pits:
         state['game_over'] = True
         state['dead'] = True
         state['score'] -= 50
-        if (ax, ay) in pits:
-            state['message'] = f'Agent fell into a pit at ({ax},{ay})! Final Score: {state["score"]}'
-        else:
-            state['message'] = f'Agent was eaten by the Wumpus at ({ax},{ay})! Final Score: {state["score"]}'
+        state['message'] = '☠️ Consumed by the Corruption!'
+        return state
+    
+    if (ax, ay) == wumpus:
+        state['game_over'] = True
+        state['dead'] = True
+        state['score'] -= 50
+        state['message'] = '🐉 Devoured by the Corrupted Beast!'
         return state
     
     if [ax, ay] not in state['visited']:
         state['visited'].append([ax, ay])
         state['score'] += 25
+        state['message'] = '⚔️ Explored a new area!'
     
     update_kb(state, ax, ay, percepts)
     next_cell, reason = choose_next_move(state)
@@ -311,34 +286,30 @@ def step_agent(state):
         state['won'] = True
         state['game_over'] = True
         state['score'] += 200
-        state['message'] = f'VICTORY! Explored {len(state["visited"])} cells! Final Score: {state["score"]}'
+        state['message'] = '🏆 The Dungeon is Purified!'
         return state
     
     nx, ny = next_cell
-    old_agent = state['agent']
     state['agent'] = [nx, ny]
     
     if reason == 'safe_proven':
         state['score'] += 15
+        state['message'] = '🛡️ Safe path found!'
     
     if reason == 'unknown_risk':
         state['score'] += 5
-    
-    percept_str = ', '.join(percepts) if percepts else 'none'
-    state['message'] = f'Moved ({old_agent[0]},{old_agent[1]}) to ({nx},{ny}) | Percepts: {percept_str} | Score: {state["score"]}'
+        state['message'] = '❓ Entering unknown territory...'
     
     total_safe_cells = state['rows'] * state['cols'] - len(state['pits'])
     if len(state['visited']) >= total_safe_cells:
         state['won'] = True
         state['game_over'] = True
         state['score'] += 200
-        state['message'] = f'VICTORY! Explored {len(state["visited"])} safe cells! Final Score: {state["score"]}'
+        state['message'] = '🏆 The Corruption is Cleansed!'
     
     return state
 
-
 def serialize_state(state):
-    """Convert state to JSON-serializable dict."""
     kb = state['kb']
     pits = [tuple(p) for p in state['pits']]
     wumpus = tuple(state['wumpus'])
@@ -386,62 +357,59 @@ def serialize_state(state):
         'resolution_calls': kb.resolution_calls,
         'resolution_steps': kb.resolution_steps,
         'inference_steps': kb.inference_steps,
+        'sound_event': get_sound_event(state)
     }
 
+def get_sound_event(state):
+    if state['game_over']:
+        if state['won']:
+            return 'victory'
+        return 'death'
+    if state['steps_taken'] > 0:
+        return 'step'
+    return None
 
-# ─── Flask Routes ──────────────────────────────────────────────────────────────
+# ─── ROUTES ──────────────────────────────────────────────────────
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-
 @app.route('/new', methods=['POST'])
 def new_episode():
-    """Initialize a new world."""
     global world_state
     try:
         data = request.get_json()
-        
         rows = max(2, min(6, int(data.get('rows', 4))))
         cols = max(2, min(6, int(data.get('cols', 4))))
         num_pits = max(1, min(rows * cols // 3, int(data.get('pits', 3))))
         
         world_state = init_world(rows, cols, num_pits)
-        
         return jsonify(serialize_state(world_state))
-    
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
 @app.route('/step', methods=['POST'])
 def step():
-    """Perform one agent step."""
     global world_state
     if not world_state:
-        return jsonify({'error': 'No world initialized. Click New Episode first.'}), 400
-    
+        return jsonify({'error': 'No world initialized'}), 400
     try:
         world_state = step_agent(world_state)
         return jsonify(serialize_state(world_state))
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
 @app.route('/state', methods=['GET'])
 def get_state():
-    """Get current state."""
     if not world_state:
         return jsonify({'error': 'No world initialized'}), 400
-    
     try:
         return jsonify(serialize_state(world_state))
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
 if __name__ == '__main__':
-    print("Starting Wumpus World Server...")
-    print("Open http://localhost:5000 in your browser")
+    print("⚔️ THE CORRUPTED DEPTHS")
+    print("🏰 http://localhost:5000")
     app.run(debug=True, port=5000)
